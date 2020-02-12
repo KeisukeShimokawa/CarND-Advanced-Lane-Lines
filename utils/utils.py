@@ -90,9 +90,24 @@ def get_hsv_color_range(hsv, lower, upper):
     """
     
     if (type(lower) == list) or (type(upper) == list):
-        lower = np.array()
-        upper = np.array()
+        lower = np.array(lower)
+        upper = np.array(upper)
     
-    frame_mask = cv2.inRange(sample_img_hsv, lower, upper)
-    dst = cv2.bitwise_and(sample_img_hsv, sample_img_hsv, mask=frame_mask)
+    frame_mask = cv2.inRange(hsv, lower, upper)
+    dst = cv2.bitwise_and(hsv, hsv, mask=frame_mask)
     return dst
+
+
+def gradient_magnitude(sobelx, sobely):
+    """
+    get the magnitude of gradients of sobel filter for both x and y direction
+    
+    args:
+        sobelx(ndarray): normalized 2-dim image after applying x direction sobel filter 
+        sobely(ndarray): normalized 2-dim image after applying y direction sobel filter
+    """
+    
+    gradmag = np.sqrt(sobelx**2 + sobely**2)
+    scale_factor = np.max(gradmag) / 255
+    gradmag = (gradmag / scale_factor).astype(np.uint8)
+    return gradmag
