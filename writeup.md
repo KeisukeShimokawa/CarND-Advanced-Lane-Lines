@@ -153,7 +153,7 @@ Finally, based on the coefficient of the curve and the y coordinate of the image
 
 The approximate position of the lane has been detected.
 
-![alt text][output_images/lane_line_warped_detect_line.png]
+![alt text](output_images/lane_line_warped_detect_line.png)
 
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
