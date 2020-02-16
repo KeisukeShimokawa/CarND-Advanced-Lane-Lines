@@ -294,3 +294,46 @@ def print_curvature_info(img, left_curvature, right_curvature):
                           font, 2, (0, 0, 0), 5, cv2.LINE_AA)
     
     return out_img
+
+
+def create_video(in_file, out_file, data, cfg, perspective_mtx):
+    cap = cv2.VideoCapture(in_file)
+
+    fourcc = cv2.VideoWriter_fourcc(*'MP4S')
+    frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    size = (width, height)
+    out = cv2.VideoWriter(out_file, fourcc, fps, size)
+
+    for ith in tqdm(range(frames)):
+
+        # frame : BGR-scale image
+        ret, frame = cap.read()
+
+        if ret == True:
+            frame = dst = cv2.undistort(frame, data['mtx'], data['dist'], None, data['newcameramtx'])
+            binary = get_binary_mask_from_image(frame, cfg)
+            binary_warped = cv2.warpPerspective(binary, perspective_mtx['M'], size)
+            leftx_base, rightx_base = get_leftx_rightx_base(binary_warped)
+            leftx, lefty, rightx, righty = get_left_right_lane_xy(binary_warped, 
+                                                                  leftx_base, 
+                                                                  rightx_base)
+            left_fit, right_fit = get_lane_line_coefficients(leftx, lefty, rightx, righty)
+            left_fitx, right_fitx, ploty = get_lane_line_position(size[1], left_fit, right_fit)
+            lane_pts = get_lane_pts_for_fillPoly(left_fitx, right_fitx, ploty)
+            img_lane_warped = get_lane_rectangle_image(binary_warped, lane_pts)
+            img_lane = cv2.warpPerspective(img_lane_warped, perspective_mtx['MInv'], size)
+
+            out_img = weighted_img(img_lane, frame)
+            left_curvature, right_curvature = get_lane_curvature(left_fit, right_fit, ploty)
+            window_img = print_curvature_info(out_img, left_curvature, right_curvature)
+
+            out.write(window_img)
+
+        else:
+            break
+
+    cap.release()
+    out.release()
