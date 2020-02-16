@@ -5,6 +5,7 @@ import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+from tqdm import tqdm
 
 
 def plot_all_images(images_path):
@@ -224,11 +225,16 @@ def get_left_right_lane_xy(binary, leftx_base, rightx_base):
     return leftx, lefty, rightx, righty
 
 
-def get_fitting_lane_line_position(leftx, lefty, rightx, righty):
+def get_lane_line_coefficients(leftx, lefty, rightx, righty):
     
     left_fit = np.polyfit(lefty, leftx, 2)
     right_fit = np.polyfit(righty, rightx, 2)
     
+    return left_fit, right_fit
+    
+
+def get_lane_line_position(height, left_fit, right_fit):
+
     ploty = np.linspace(0, height-1, height)
 
     left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
@@ -261,32 +267,30 @@ def weighted_img(img, initial_img, α=0.8, β=1., γ=0.):
     return cv2.addWeighted(initial_img, α, img, β, γ)
 
 
-def lane_finding(path, cfg, perspective_mtx):
+def get_lane_curvature(left_fit, right_fit, ploty):
     
-    img = cv2.imread(path)
-    im_size = img.shape[::-1][1:]
+    ym_per_pix = 30/720 # meters per pixel in y dimension
+    xm_per_pix = 3.7/700 # meters per pixel in x dimension
     
-    binary = get_binary_mask_from_image(img, cfg)
+    y_eval = np.max(ploty)
     
-    M = perspective_mtx['M']
-    MInv = perspective_mtx['MInv']
-    binary_warped = cv2.warpPerspective(binary, M, binary.shape[::-1])
+    left_curverad = ((1 + (2*left_fit[0]*y_eval*ym_per_pix + left_fit[1])**2)**1.5) / np.absolute(2*left_fit[0])
+    right_curverad = ((1 + (2*right_fit[0]*y_eval*ym_per_pix + right_fit[1])**2)**1.5) / np.absolute(2*right_fit[0])
+
+    return left_curverad, right_curverad
+
+
+def print_curvature_info(img, left_curvature, right_curvature):
     
-    leftx_base, rightx_base = get_leftx_rightx_base(binary_warped)
+    left_curve_text  = f'Left Curvature: {left_curvature:.2f} m'
+    right_curve_text = f'Right Curvature: {right_curvature:.2f} m'
     
-    leftx, lefty, rightx, righty = get_left_right_lane_xy(binary_warped, 
-                                                          leftx_base, 
-                                                          rightx_base)
+    font = cv2.FONT_HERSHEY_SIMPLEX
     
-    left_fitx, right_fitx, ploty = get_fitting_lane_line_position(leftx, lefty, 
-                                                                  rightx, righty)
-    
-    lane_pts = get_lane_pts_for_fillPoly(left_fitx, right_fitx, ploty)
-    
-    img_lane_warped = get_lane_rectangle_image(binary_warped, lane_pts)
-    
-    img_lane = cv2.warpPerspective(img_lane_warped, MInv, im_size)
-    
-    out_img = weighted_img(img_lane, cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    out_img = img.copy()
+    out_img = cv2.putText(out_img, left_curve_text, (10, 50),
+                          font, 2, (0, 0, 0), 5, cv2.LINE_AA)
+    out_img = cv2.putText(out_img, right_curve_text, (10, 110),
+                          font, 2, (0, 0, 0), 5, cv2.LINE_AA)
     
     return out_img
