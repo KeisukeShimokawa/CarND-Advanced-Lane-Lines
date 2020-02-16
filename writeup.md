@@ -203,9 +203,6 @@ The code used is the function `create_video()` in the `utils.py` file.
 
 Here's a [link to my video result](project_output.avi)
 
-Here's a [link to my challenge video result](challenge_output.avi)
-
-Here's a [link to my harder-challenge video result](harder_challenge_output.avi)
 
 ---
 
