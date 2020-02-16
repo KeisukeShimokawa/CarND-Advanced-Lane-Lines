@@ -37,17 +37,17 @@ Displays the original chessboard image. This chessboard has nine corners in the 
 
 To detect the corners present on a chessboard, first convert the original image to grayscale and apply the function `cv2.findChessboardCorners()` to the converted image.
 
-![alt text][./output_images/original_chessboard.png]
+![alt text][output_images/original_chessboard.png]
 
 The detected corner is displayed on the original image. You can see that the colorful lines and the corresponding corners are correctly detected.
 
-![alt text][./output_images/original_chessCorners.png]
+![alt text][output_images/original_chessCorners.png]
 
 Apply the function `cv2.undistort()` to the original image, using the camera matrix and distortion coefficients.
 
 In the original image, the lines on the chessboard were distorted at the edges of the image, but after correcting the distortion, you can see that the distorted lines could be corrected to straight lines.
 
-![alt text][./output_images/undistort_chessboard.png]
+![alt text][output_images/undistort_chessboard.png]
 
 ### Pipeline (single images)
 
@@ -55,11 +55,11 @@ In the original image, the lines on the chessboard were distorted at the edges o
 
 Here, we will construct a lane detection algorithm for images that are straight and contain yellow and white lanes.
 
-![alt text][./output_images/lane_line_original_straight1.png]
+![alt text][output_images/lane_line_original_straight1.png]
 
 Using the camera matrix and the distortion coefficient obtained using the chessboard to correct the distortion of the original image, the distortion near the edge of the image is corrected, as shown in the following image.
 
-![alt text][./output_images/lane_line_undistort_straight1.png]
+![alt text][output_images/lane_line_undistort_straight1.png]
 
 #### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 
@@ -69,37 +69,37 @@ First, convert the image to grayscale, then apply Sobel FIlter in both the x and
 
 After calculating the gradient of the image, the negative value is corrected with the absolute value, and then the normalization process is performed so that the value of the image falls within the range of 0 to 255.
 
-![alt text][./output_images/lane_line_sobelx.png]
+![alt text][output_images/lane_line_sobelx.png]
 
-![alt text][./output_images/lane_line_sobely.png]
+![alt text][output_images/lane_line_sobely.png]
 
 Apply two thresholds to the resulting image gradient, using the minimum and maximum values.
 
-![alt text][./output_images/lane_line_sobelx_binary.png]
+![alt text][output_images/lane_line_sobelx_binary.png]
 
-![alt text][./output_images/lane_line_sobely_binary.png]
+![alt text][output_images/lane_line_sobely_binary.png]
 
 Next, the magnitude of the gradient is calculated from the gradient in the x direction and the gradient in the y direction, and two threshold processes are performed using the minimum and maximum values.
 
-![alt text][./output_images/lane_line_sobelmag.png]
+![alt text][output_images/lane_line_sobelmag.png]
 
-![alt text][./output_images/lane_line_sobelmag_binary.png]
+![alt text][output_images/lane_line_sobelmag_binary.png]
 
 Next, convert the image to HLS format and use the S channel for lane detection.
 
 Since the S channel can supplement both the yellow and white lanes, it is binarized.
 
-![alt text][./output_images/lane_line_hls_schannel.png]
+![alt text][output_images/lane_line_hls_schannel.png]
 
-![alt text][./output_images/lane_line_hls_schannel_binary.png]
+![alt text][output_images/lane_line_hls_schannel_binary.png]
 
 Next, convert the image to HSV format, set the upper and lower limits of color, and extract only the pixels included in the range.
 
 This time, the upper and lower limits of each HSV value are set so that the yellow lane and the white lane can be detected.
 
-![alt text][./output_images/lane_line_hsv_vchannel.png]
+![alt text][output_images/lane_line_hsv_vchannel.png]
 
-![alt text][./output_images/lane_line_hsv_vchannel_binary.png]
+![alt text][output_images/lane_line_hsv_vchannel_binary.png]
 
 Finally, combine the binarized images obtained by each threshold processing to obtain the final binarized image.
 
@@ -110,14 +110,14 @@ binary[((sx_binary == 1) & (sy_binary == 1) & (smag_binary == 1)) |
        (hsv_range_binary == 1)] = 1
 ```
 
-![alt text][./output_images/lane_line_all_binary.png]
+![alt text][output_images/lane_line_all_binary.png]
 
 
 #### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
 In order to convert the image into a bird's-eye view, a perspective transformation is applied to the binarized image obtained last.
 
-![alt text][./output_images/lane_line_warped_binary.png]
+![alt text][output_images/lane_line_warped_binary.png]
 
 This resulted in the following source and destination points:
 
@@ -153,7 +153,7 @@ Finally, based on the coefficient of the curve and the y coordinate of the image
 
 The approximate position of the lane has been detected.
 
-![alt text][./output_images/lane_line_warped_detect_line.png]
+![alt text][output_images/lane_line_warped_detect_line.png]
 
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
@@ -174,14 +174,14 @@ left_curverad = ((1 + (2*left_fit[0]*y_eval*ym_per_pix + left_fit[1])**2)**1.5) 
 right_curverad = ((1 + (2*right_fit[0]*y_eval*ym_per_pix + right_fit[1])**2)**1.5) / np.absolute(2*right_fit[0])
 ```
 
-![alt text][./output_images/lane_line_final_image.png]
+![alt text][output_images/lane_line_final_image.png]
 
 
 #### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
 Since the detected lane position is obtained only for the perspective-transformed image, the perspective transformation is performed again to convert the image to the image from the original viewpoint.
 
-![alt text][./output_images/lane_line_final_image.png]
+![alt text][output_images/lane_line_final_image.png]
 
 ---
 
@@ -195,17 +195,17 @@ This time, using the function of `OpenCV`, we get the image from the video and c
 
 The code used is the function `create_video()` in the `utils.py` file.
 
-![alt text][./output_images/movie_0000.png]
+![alt text][output_images/movie_0000.png]
 
-![alt text][./output_images/movie_0800.png]
+![alt text][output_images/movie_0800.png]
 
-![alt text][./output_images/movie_1200.png]
+![alt text][output_images/movie_1200.png]
 
-Here's a [link to my video result](./project_output.avi)
+Here's a [link to my video result](project_output.avi)
 
-Here's a [link to my challenge video result](./challenge_output.avi)
+Here's a [link to my challenge video result](challenge_output.avi)
 
-Here's a [link to my harder-challenge video result](./harder_challenge_output.avi)
+Here's a [link to my harder-challenge video result](harder_challenge_output.avi)
 
 ---
 
