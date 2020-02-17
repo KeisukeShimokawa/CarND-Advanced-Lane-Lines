@@ -201,7 +201,7 @@ The code used is the function `create_video()` in the `utils.py` file.
 
 ![alt text](output_images/movie_1200.png)
 
-Here's a [link to my video result](project_output.avi)
+Here's a ![link to my video result](https://www.dropbox.com/s/kntdhb12nuagofw/project_output.avi?dl=0)
 
 
 ---
